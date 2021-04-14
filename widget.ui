@@ -58,6 +58,26 @@
     <string>TextLabel</string>
    </property>
   </widget>
+  <widget class="QWidget" name="wid1" native="true">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>320</y>
+     <width>120</width>
+     <height>80</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QWidget" name="wid2" native="true">
+   <property name="geometry">
+    <rect>
+     <x>170</x>
+     <y>440</y>
+     <width>120</width>
+     <height>80</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

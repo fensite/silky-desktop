@@ -38,6 +38,7 @@ public:
     void pic_display(QLabel*l_pic);
     void appicon_display(QTableView* tableView);
     void app_mouseenter(QTableView* tableView);
+    bool eventFilter(QObject *watched, QEvent *event);
 
 
 
@@ -49,6 +50,7 @@ private:
     QVector <QStringList> applist;
     void initData();
     TestListView *page = new TestListView();
+    int flag=1;
 
 };
 

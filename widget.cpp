@@ -62,7 +62,7 @@ Widget::Widget(QWidget *parent)
     //page->setMovement(QListView::Snap);
 
     page->setMinimumSize(1200,996);
-    page->setMaximumSize(1200,996);
+   // page->setMaximumSize(1200,996);
 
     //page->setSpacing(72);                   //为视图设置控件间距
     //ui->listView->setModel(m_model);                  //为委托设置模型
@@ -83,6 +83,10 @@ Widget::Widget(QWidget *parent)
       QPalette pal =this->palette();
       pal.setBrush(QPalette::Background,QBrush(QPixmap("../layout/pics/background.jpeg")));
       setPalette(pal);
+
+      ui->wid2->installEventFilter(this);
+      ui->wid1->installEventFilter(this);
+
 
 
 }
@@ -123,13 +127,17 @@ void Widget::initData()//显示app图标
     page->setHorizontalScrollMode(QListView::ScrollPerPixel);
     QScroller::grabGesture(page,QScroller::LeftMouseButtonGesture);
     page->setSelectionMode(QListView::ExtendedSelection);
+
+
+
    //QListView::Item:hover { background: rgba(255,255,255,20%); font-color: white; }
     page->setStyleSheet(R"(
                        QListView { outline: none; background-color: transparent; }
                        )");
 
+
     slm=new QStandardItemModel(this);
-    page->setSpacing(82);
+
     for (int i = 0; i < applist.size(); i++) {
         QStandardItem *s1;
 
@@ -244,8 +252,8 @@ void Widget::display()
     layout_p->addLayout(layout_t,0,0);
     layout_p->addWidget(l_pic,1,0);
     //l_pic->setAlignment(Qt::AlignCenter);
-
-
+    ui->wid1->setLayout(layout_p);
+    ui->wid1->setGeometry(QRect(0,0,610,1080));
 
 
     QGridLayout* layout_a = new QGridLayout();//右侧app布局
@@ -255,15 +263,17 @@ void Widget::display()
     QLabel *l_table1=new QLabel();
     QLabel *l_blet1=new QLabel();
 
-    page->setMinimumSize(1296,996);
+    page->setMinimumSize(1200,996);
     //tableView->resize(1300,996);
     //tableView->horizontalHeader()->setVisible(false);// 水平不可见
     //tableView->verticalHeader()->setVisible(false);// 垂直不可见
 
 
-    //l_blet->setStyleSheet("QLabel{background-color: rgb(255, 255, 127);}");
-    //l_table1->setStyleSheet("QLabel{background-color: rgb(127, 255, 255);}");
-    //sl_blet1->setStyleSheet("QLabel{background-color: rgb(255, 127, 127);padding:0;}");
+    l_blet->setStyleSheet("QLabel{background-color: rgb(255, 255, 127);}");
+   // l_table1->setStyleSheet("QLabel{background-color: rgb(127, 255, 255);}");
+    //l_blet1->setStyleSheet("QLabel{background-color: rgb(255, 127, 127);padding:0;}");
+   // l_blet->setMaximumWidth(100);
+   // l_blet1->setMaximumWidth(100);
 
     //appicon_display(tableView);
 
@@ -276,82 +286,137 @@ void Widget::display()
     layout_a->setRowStretch(1, 55);
     layout_a->setColumnStretch(0, 21.6);
     layout_a->setColumnStretch(1, 1);
+    ui->wid2->setLayout(layout_a);
+    ui->wid2->setGeometry(QRect(610,0,1300,1080));
 
 
-     QGridLayout* mainlayout = new QGridLayout();//总体布局
+     //QGridLayout* mainlayout = new QGridLayout();//总体布局
      //QLabel *l=new QLabel();
      //l->setStyleSheet("QLabel{background-color: rgb(255, 255, 255);}");
-     mainlayout->addLayout(layout_p,0,0);
-     mainlayout->addLayout(layout_a,0,1);
+    // mainlayout->addLayout(layout_p,0,0);
+     //mainlayout->addLayout(layout_a,0,1);
      //mainlayout->addWidget(l_blet1,1,0,1,2);
 
      //mainlayout->setRowStretch(0, 14.9);//设置行列比例系数
      //mainlayout->setRowStretch(1, 1);
-     mainlayout->setColumnStretch(0, 1);
-     mainlayout->setColumnStretch(1, 2.41);
-     mainlayout->setSpacing(0);
+   // mainlayout->setColumnStretch(0, 1);
+   //  mainlayout->setColumnStretch(1, 2.41);
+    // mainlayout->setSpacing(0);
 
 
 
     resize(1920,1080);
-    setLayout(mainlayout);
+   // setLayout(mainlayout);
 
 }
 
 
+bool Widget::eventFilter(QObject *watched, QEvent *event)
+{
+     static int press_x;
+     static int press_y;
+     static int relea_x;  //鼠标释放时的位置
+     static int relea_y;
+
+
+    if(watched==ui->wid1&&flag==1)
+    {
+        QMouseEvent *eve = static_cast<QMouseEvent *>(event);
+
+        if(eve->type()==QEvent::MouseButtonPress)
+        {
+            //QMouseEvent *ev = static_cast<QMouseEvent *>(event); //将之转换为鼠标事件
+            press_x = eve->globalX();
+            press_y = eve->globalY();
+
+        }
+
+        if(eve->type()==QEvent::MouseButtonRelease)
+        {
+            relea_x = eve->globalX();
+            relea_y = eve->globalY();
+           if((relea_x - press_x)==0 && (relea_y - press_y)==0)
+            {
+                QPropertyAnimation *ani=new QPropertyAnimation(ui->wid1,"geometry");
+                ani->setDuration(300);
+                ani->setStartValue(QRect(ui->wid1->geometry()));
+                ani->setEndValue(QRect(-ui->wid1->width(),0,ui->wid1->width(),ui->wid1->height()));
+
+
+                QPropertyAnimation *ani1=new QPropertyAnimation(ui->wid2,"geometry");
+                ani1->setDuration(300);
+                ani1->setStartValue(QRect(ui->wid2->geometry()));
+                ani1->setEndValue(QRect(110,0,1820,1080));
+               // QRect(610,0,1300,1080)
+
+                QPropertyAnimation *ani2=new QPropertyAnimation(page,"gridSize");
+                ani2->setDuration(300);
+                // setGridSize ( QSize ( 206, 238));
+                ani2->setStartValue(QSize(206, 238));
+                ani2->setEndValue(QSize ( 306, 238));
+
+                QParallelAnimationGroup *group=new QParallelAnimationGroup();
+                group->addAnimation(ani);
+                group->addAnimation(ani1);
+                group->addAnimation(ani2);
+                group->start();
+                flag=0;
+            }
+        }
+    }
 
 
 
-//    QVector<QStringList> allapp = pUkuiMenuInterface -> createAppInfoVector();
+     if(watched==ui->wid2&&flag==0)
+    {
+         QMouseEvent *eve = static_cast<QMouseEvent *>(event);
 
-//    QStandardItemModel model = new QStandardItemModel();
+        if(eve->type()==QEvent::MouseButtonPress)
+        {
+            //QMouseEvent *ev = static_cast<QMouseEvent *>(event); //将之转换为鼠标事件
+            press_x = eve->globalX();
+            press_y = eve->globalY();
 
-//    for (int i = 0; i < 24; i++) {
-//        QStandardItem *Item = new QStandardItem;
-//        //ItemData itemData;
-//        Item -> setDragEnabled(true);
-//        Item -> setDropEnabled(true);
-//        Item -> setSelectable(true);
-//        Item -> setEditable(false);
-//        Item -> setEnabled(true);
+        }
 
-//        //itemData.name = pUkuiMenuInterface -> getAppName(allapp[i][0]);
-//        //qDebug() << pUkuiMenuInterface -> getAppName(allapp[i][0]);
-//        QString iconstr=pUkuiMenuInterface->getAppIcon(allapp[i][0]);
-//        QIcon icon;
-//        QFileInfo iconFileInfo(iconstr);
-//        if(iconFileInfo.isFile() && (iconstr.endsWith(".png") || iconstr.endsWith(".svg")))
-//            icon=QIcon(iconstr);
-//        else
-//        {
-//            iconstr.remove(".png");
-//            iconstr.remove(".svg");
-//            icon=QIcon::fromTheme(iconstr);
-//            if(icon.isNull())
-//            {
-//                if(QFile::exists(QString("/usr/share/icons/hicolor/scalable/apps/%1.%2").arg(iconstr).arg("svg")))
-//                    icon=QIcon(QString("/usr/share/icons/hicolor/scalable/apps/%1.%2").arg(iconstr).arg("svg"));
-//                else if(QFile::exists(QString("/usr/share/icons/hicolor/scalable/apps/%1.%2").arg(iconstr).arg("png")))
-//                    icon=QIcon(QString("/usr/share/icons/hicolor/scalable/apps/%1.%2").arg(iconstr).arg("png"));
-//                else if(QFile::exists(QString("/usr/share/icons/hicolor/128x128/apps/%1.%2").arg(iconstr).arg("svg")))
-//                    icon=QIcon(QString("/usr/share/icons/hicolor/128x128/apps/%1.%2").arg(iconstr).arg("svg"));
-//                else if(QFile::exists(QString("/usr/share/icons/hicolor/32x32/apps/%1.%2").arg(iconstr).arg("png")))
-//                    icon=QIcon(QString("/usr/share/icons/hicolor/128x128/apps/%1.%2").arg(iconstr).arg("png"));
-//                else if(QFile::exists(QString("/usr/share/pixmaps/%1.%2").arg(iconstr).arg("png")))
-//                    icon=QIcon(QString("/usr/share/pixmaps/%1.%2").arg(iconstr).arg("png"));
-//                else if(QFile::exists(QString("/usr/share/pixmaps/%1.%2").arg(iconstr).arg("svg")))
-//                    icon=QIcon(QString("/usr/share/pixmaps/%1.%2").arg(iconstr).arg("svg"));
-//                else
-//                    icon=QIcon::fromTheme(QString("application-x-desktop"));
-//            }
-//        }
+        if(eve->type()==QEvent::MouseButtonRelease)
+        {
+            relea_x = eve->globalX();
+            relea_y = eve->globalY();
 
-//        itemData.icon = icon;
-//        //qDebug() << itemData.icon;
-//        Item -> setIcon(itemData.icon);
-//        Item->setData(QVariant::fromValue(itemData),Qt::UserRole+1);//整体存取
+             if((relea_x - press_x)==0 && (relea_y - press_y)==0)
+            {
+                 QPropertyAnimation *ani=new QPropertyAnimation(ui->wid1,"geometry");
+                 ani->setDuration(300);
+                 ani->setStartValue(QRect(ui->wid1->geometry()));
+                 ani->setEndValue(QRect(0,0,ui->wid1->width(),ui->wid1->height()));
 
-//        m_model->appendRow(Item);      //追加Item
-//    }
+
+                 QPropertyAnimation *ani1=new QPropertyAnimation(ui->wid2,"geometry");
+                 ani1->setDuration(300);
+                 ani1->setStartValue(QRect(ui->wid2->geometry()));
+                 ani1->setEndValue(QRect(610,0,1300,1080));
+
+                 QPropertyAnimation *ani2=new QPropertyAnimation(page,"gridSize");
+                 ani2->setDuration(300);
+                 // setGridSize ( QSize ( 206, 238));
+                 ani2->setStartValue(QSize(306, 238));
+                 ani2->setEndValue(QSize ( 206, 238));
+
+                 QParallelAnimationGroup *group=new QParallelAnimationGroup();
+                 group->addAnimation(ani);
+                 group->addAnimation(ani1);
+                 group->addAnimation(ani2);
+                 group->start();
+                 flag=1;
+
+            }
+        }
+    }
+     return QWidget::eventFilter(watched,event);
+}
+
+
+
 
 

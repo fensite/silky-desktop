@@ -22,7 +22,6 @@ SOURCES += \
     getCapp.cpp \
     itemdef.cpp \
     itemdelegate.cpp \
-    itemevent.cpp \
     main.cpp \
     widget.cpp
 
@@ -33,11 +32,9 @@ HEADERS += \
     getCapp.h \
     itemdef.h \
     itemdelegate.h \
-    itemevent.h \
     widget.h
 
 FORMS += \
-    newwidget.ui \
     widget.ui
 
 TRANSLATIONS += \

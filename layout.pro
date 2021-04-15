@@ -17,7 +17,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     TestListView.cpp \
-    animation.cpp \
     getApp.cpp \
     getCapp.cpp \
     itemdef.cpp \
@@ -27,7 +26,6 @@ SOURCES += \
 
 HEADERS += \
     TestListView.h \
-    animation.h \
     getApp.h \
     getCapp.h \
     itemdef.h \

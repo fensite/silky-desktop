@@ -5,11 +5,22 @@
 #include<QMimeData>
 #include<QDrag>
 #include<QDebug>
-
+#include<widget.h>
+#include<getApp.h>
+#include<QSettings>
+#include <QDBusInterface>
+#include <QDBusReply>
+#include <QDir>
+#include <QSvgRenderer>
+#include <QHeaderView>
+#include<QFile>
 
 TestListView::TestListView(QWidget *parent) :
     QListView(parent)
 {
+    UkuiMenuInterface *pUkuiMenuIneterface = new UkuiMenuInterface;
+    applist = pUkuiMenuIneterface -> createAppInfoVector();
+
 //    setMouseTracking(true);
     setDragEnabled(true);
     setAcceptDrops(true);
@@ -65,6 +76,8 @@ void TestListView::dragMoveEvent(QDragMoveEvent *event)
             else
             {
                 if(oldHighlightedRow != theHighlightedRow){
+
+                    //qDebug() << theHighlightedRow << oldHighlightedRow;
                     //刷新旧区域使dropIndicator消失
                     update(model()->index(oldHighlightedRow, 0));
                     update(model()->index(oldHighlightedRow + 1, 0));
@@ -72,10 +85,12 @@ void TestListView::dragMoveEvent(QDragMoveEvent *event)
                     //刷新新区域使dropIndicator显示
                     update(model()->index(theHighlightedRow, 0));
                     update(model()->index(theHighlightedRow + 1, 0));
+
                 }else{
                     update(model()->index(theHighlightedRow, 0));
                     update(model()->index(theHighlightedRow + 1, 0));
                 }
+
 
 
                 theInsertRow = theHighlightedRow + 1;
@@ -102,17 +117,56 @@ void TestListView::dropEvent(QDropEvent *event)
         oldHighlightedRow = theHighlightedRow;
         theHighlightedRow = -2;
 
+        //qDebug() << oldHighlightedRow << theDragRow;
+
+
+        //改变applist内容
+        if(oldHighlightedRow > theDragRow)
+        {
+            QStringList  temp = applist[oldHighlightedRow];
+            applist[oldHighlightedRow] = applist[theDragRow];
+            for(int i = theDragRow; i < oldHighlightedRow - 1; i++)
+            {
+                applist[i] = applist[i + 1];
+            }
+            applist[oldHighlightedRow - 1] = temp;
+        }
+        if(oldHighlightedRow < theDragRow)
+        {
+            QStringList  temp = applist[theDragRow];
+            for(int i = theDragRow; i > oldHighlightedRow + 1; i--)
+            {
+                applist[i] = applist[i - 1];
+            }
+            applist[oldHighlightedRow + 1] = temp;
+        }
+
+        QFile file("../layout/applist.txt");
+        file.open(QIODevice::WriteOnly);
+        file.write("");
+        file.close();
+
+        file.open(QIODevice::Append | QIODevice::Text);
+        for(int i = 0; i < applist.size(); i++)
+        {
+            //qDebug() << applist[i];
+            for(int j = 0; j < 6; j++)
+            {
+                file.write(applist[i][j].toUtf8());
+                file.write("\n");
+            }
+
+        }
+        file.close();
+
+
         //刷新以使dropIndicator消失
         update(model()->index(oldHighlightedRow, 0));
         update(model()->index(oldHighlightedRow + 1, 0));
 
         if(theInsertRow == theDragRow || theInsertRow == theDragRow + 1) return;
 
-        //这里我像QListWidget那样调用父类dropEvent(event)发现不起作用(原因尚不明)，没办法，只能删除旧行，插入新行
-        //if(theSelectedRow == theDragRow){
-            //QListView::dropEvent(event);
-            //return;
-        //}
+
 
 //[1]从event->mimeData()取出拖拽数据
         QString text;
@@ -169,4 +223,21 @@ void TestListView::startDrag(Qt::DropActions)
         else theRemoveRow = theDragRow;
         model()->removeRow(theRemoveRow);
     }
+}
+
+
+void TestListView:: mouseDoubleClickEvent(QMouseEvent *event)
+{
+    int runIndex = currentIndex().row();
+    UkuiMenuInterface *pUkuiMenuIneterface = new UkuiMenuInterface;
+
+    QString appexec = pUkuiMenuIneterface -> getAppExec(applist[runIndex][0]);
+
+
+//    Q_EMIT sendHideMainWindowSignal();
+//    QString desktopfp=applist[runIndex][0];
+//    GDesktopAppInfo * desktopAppInfo=g_desktop_app_info_new_from_filename(desktopfp.toLocal8Bit().data());
+//    g_app_info_launch(G_APP_INFO(desktopAppInfo),nullptr, nullptr, nullptr);
+//    g_object_unref(desktopAppInfo);
+  //  qDebug() << applist[runIndex][0];
 }

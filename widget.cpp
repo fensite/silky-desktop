@@ -88,7 +88,6 @@ Widget::Widget(QWidget *parent)
       ui->wid1->installEventFilter(this);
 
 
-
 }
 
 Widget::~Widget()
@@ -127,17 +126,13 @@ void Widget::initData()//显示app图标
     page->setHorizontalScrollMode(QListView::ScrollPerPixel);
     QScroller::grabGesture(page,QScroller::LeftMouseButtonGesture);
     page->setSelectionMode(QListView::ExtendedSelection);
-
-
-
    //QListView::Item:hover { background: rgba(255,255,255,20%); font-color: white; }
     page->setStyleSheet(R"(
                        QListView { outline: none; background-color: transparent; }
                        )");
 
-
     slm=new QStandardItemModel(this);
-
+    page->setSpacing(82);
     for (int i = 0; i < applist.size(); i++) {
         QStandardItem *s1;
 
@@ -269,7 +264,7 @@ void Widget::display()
     //tableView->verticalHeader()->setVisible(false);// 垂直不可见
 
 
-    l_blet->setStyleSheet("QLabel{background-color: rgb(255, 255, 127);}");
+    //l_blet->setStyleSheet("QLabel{background-color: rgb(255, 255, 127);}");
    // l_table1->setStyleSheet("QLabel{background-color: rgb(127, 255, 255);}");
     //l_blet1->setStyleSheet("QLabel{background-color: rgb(255, 127, 127);padding:0;}");
    // l_blet->setMaximumWidth(100);
@@ -415,8 +410,6 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
     }
      return QWidget::eventFilter(watched,event);
 }
-
-
 
 
 

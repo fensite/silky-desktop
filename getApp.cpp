@@ -27,6 +27,7 @@
 #include <QJsonObject>
 #include "getCapp.h"
 #include<QPushButton>
+#include <QFile>
 
 UkuiMenuInterface::UkuiMenuInterface()
 {
@@ -237,74 +238,105 @@ QStringList UkuiMenuInterface::getDesktopFilePath()
 //创建应用信息容器
 QVector<QStringList> UkuiMenuInterface::createAppInfoVector()
 {
-    desktopfpVector.clear();
-    QVector<QStringList> appInfoVector;
-    QVector<QStringList> vector;
-    vector.append(QStringList()<<"Android");//0安卓
-    vector.append(QStringList()<<"Network");//1网络
-    vector.append(QStringList()<<"Messaging");//2社交
-    vector.append(QStringList()<<"Audio"<<"Video");//3影音
-    vector.append(QStringList()<<"Development");//4开发
-    vector.append(QStringList()<<"Graphics");//5图像
-    vector.append(QStringList()<<"Game");//6游戏
-    vector.append(QStringList()<<"Office"<<"Calculator"<<"Spreadsheet"<<"Presentation"<<"WordProcessor"<<"TextEditor");//7办公
-    vector.append(QStringList()<<"Education");//8教育
-    vector.append(QStringList()<<"System"<<"Settings"<<"Security");//9系统
+    QFile file("../layout/applist.txt");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
 
-    QStringList desktopfpList=getDesktopFilePath();
-
-    for(int i=0;i<desktopfpList.count();i++)
+    if(file.size() == 0)
     {
-        QStringList appInfoList;
-        QString desktopfp=desktopfpList.at(i);
-        QString name=getAppName(desktopfpList.at(i));
-        if(!name.isEmpty())
+        desktopfpVector.clear();
+        QVector<QStringList> appInfoVector;
+        QVector<QStringList> vector;
+        vector.append(QStringList()<<"Android");//0安卓
+        vector.append(QStringList()<<"Network");//1网络
+        vector.append(QStringList()<<"Messaging");//2社交
+        vector.append(QStringList()<<"Audio"<<"Video");//3影音
+        vector.append(QStringList()<<"Development");//4开发
+        vector.append(QStringList()<<"Graphics");//5图像
+        vector.append(QStringList()<<"Game");//6游戏
+        vector.append(QStringList()<<"Office"<<"Calculator"<<"Spreadsheet"<<"Presentation"<<"WordProcessor"<<"TextEditor");//7办公
+        vector.append(QStringList()<<"Education");//8教育
+        vector.append(QStringList()<<"System"<<"Settings"<<"Security");//9系统
+
+        QStringList desktopfpList=getDesktopFilePath();
+
+        for(int i=0;i<desktopfpList.count();i++)
         {
-            QString englishName=getAppEnglishName(desktopfpList.at(i));
-            QString letter=getAppNameInitial(desktopfpList.at(i));
-            QString letters=getAppNameInitials(desktopfpList.at(i));
-
-            desktopfpVector.append(desktopfp);
-
-            appInfoList<<desktopfp<<name<<englishName<<letter<<letters;
-            bool is_owned=false;
-            for(int j=0;j<vector.size();j++)
+            QStringList appInfoList;
+            QString desktopfp=desktopfpList.at(i);
+            QString name=getAppName(desktopfpList.at(i));
+            if(!name.isEmpty())
             {
-                if(matchingAppCategories(desktopfpList.at(i),vector.at(j)))//有对应分类
-                {
-                    is_owned=true;
-                    appInfoList.append(QString::number(j));
-                }
-            }
-            if(!is_owned)//该应用无对应分类
-                appInfoList.append(QString::number(10));
+                QString englishName=getAppEnglishName(desktopfpList.at(i));
+                QString letter=getAppNameInitial(desktopfpList.at(i));
+                QString letters=getAppNameInitials(desktopfpList.at(i));
 
-            appInfoVector.append(appInfoList);
+                desktopfpVector.append(desktopfp);
+
+                appInfoList<<desktopfp<<name<<englishName<<letter<<letters;
+                bool is_owned=false;
+                for(int j=0;j<vector.size();j++)
+                {
+                    if(matchingAppCategories(desktopfpList.at(i),vector.at(j)))//有对应分类
+                    {
+                        is_owned=true;
+                        appInfoList.append(QString::number(j));
+                    }
+                }
+                if(!is_owned)//该应用无对应分类
+                    appInfoList.append(QString::number(10));
+
+                appInfoVector.append(appInfoList);
+            }
+            else
+            {
+                QFileInfo fileInfo(desktopfp);
+                QString desktopfn=fileInfo.fileName();
+                setting->beginGroup("lockapplication");
+                setting->remove(desktopfn);
+                setting->sync();
+                setting->endGroup();
+                setting->beginGroup("application");
+                setting->remove(desktopfn);
+                setting->sync();
+                setting->endGroup();
+                setting->beginGroup("datetime");
+                setting->remove(desktopfn);
+                setting->sync();
+                setting->endGroup();
+                setting->beginGroup("recentapp");
+                setting->remove(desktopfn);
+                setting->sync();
+                setting->endGroup();
+            }
         }
-        else
-        {
-            QFileInfo fileInfo(desktopfp);
-            QString desktopfn=fileInfo.fileName();
-            setting->beginGroup("lockapplication");
-            setting->remove(desktopfn);
-            setting->sync();
-            setting->endGroup();
-            setting->beginGroup("application");
-            setting->remove(desktopfn);
-            setting->sync();
-            setting->endGroup();
-            setting->beginGroup("datetime");
-            setting->remove(desktopfn);
-            setting->sync();
-            setting->endGroup();
-            setting->beginGroup("recentapp");
-            setting->remove(desktopfn);
-            setting->sync();
-            setting->endGroup();
-        }
+        file.close();
+
+        return appInfoVector;
     }
 
-    return appInfoVector;
+    else
+    {
+        QVector<QStringList> appInfoVector;
+        while(!file.atEnd())
+        {
+            QStringList ss;
+
+            for(int i = 0; i < 6; i++)
+            {
+                QString s = QString(file.readLine());
+                s.remove(QChar('\n'));
+
+                ss.append(s);
+            }
+
+            appInfoVector.append(ss);
+          //  qDebug() << ss;
+            ss.clear();
+        }
+        file.close();
+        return appInfoVector;
+    }
+
 }
 
 //获取应用名称

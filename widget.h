@@ -17,7 +17,7 @@
 #include"TestListView.h"
 #include"itemdef.h"
 
-#endif // WIDGET_H
+
 
 
 QT_BEGIN_NAMESPACE
@@ -33,6 +33,7 @@ public slots:
 
 public:
     Widget(QWidget *parent = nullptr);
+    QVector <QStringList> applist;
     ~Widget();
     void display();
     void pic_display(QLabel*l_pic);
@@ -47,10 +48,11 @@ private:
     QPoint offest;
     //ItemDelegate *m_delegate;
     QStandardItemModel *m_model;
-    QVector <QStringList> applist;
     void initData();
     TestListView *page = new TestListView();
     int flag=1;
 
 };
+
+#endif // WIDGET_H
 

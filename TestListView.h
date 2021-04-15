@@ -2,6 +2,8 @@
 #define TESTLISTVIEW_H
 
 #include<QListView>
+#include<QSettings>
+#include<QDir>
 
 
 
@@ -19,6 +21,7 @@ public:
     int highlightedRow() const {return theHighlightedRow;}
     int dragRow() const {return theDragRow;}
     static QString myMimeType() { return QStringLiteral("TestListView/text-icon"); }
+    void mouseDoubleClickEvent(QMouseEvent *event);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -33,6 +36,8 @@ private:
     int oldHighlightedRow = -2;
     int theDragRow = -1;
     int theInsertRow = -1;
+    QVector<QStringList> applist;
+
 };
 
 #endif // TESTLISTVIEW_H

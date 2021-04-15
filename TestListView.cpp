@@ -20,11 +20,9 @@ TestListView::TestListView(QWidget *parent) :
 {
     UkuiMenuInterface *pUkuiMenuIneterface = new UkuiMenuInterface;
     applist = pUkuiMenuIneterface -> createAppInfoVector();
-
-//    setMouseTracking(true);
     setDragEnabled(true);
     setAcceptDrops(true);
-    //setDropIndicatorShown(false);
+
     setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
@@ -230,14 +228,7 @@ void TestListView:: mouseDoubleClickEvent(QMouseEvent *event)
 {
     int runIndex = currentIndex().row();
     UkuiMenuInterface *pUkuiMenuIneterface = new UkuiMenuInterface;
-
     QString appexec = pUkuiMenuIneterface -> getAppExec(applist[runIndex][0]);
 
 
-//    Q_EMIT sendHideMainWindowSignal();
-//    QString desktopfp=applist[runIndex][0];
-//    GDesktopAppInfo * desktopAppInfo=g_desktop_app_info_new_from_filename(desktopfp.toLocal8Bit().data());
-//    g_app_info_launch(G_APP_INFO(desktopAppInfo),nullptr, nullptr, nullptr);
-//    g_object_unref(desktopAppInfo);
-  //  qDebug() << applist[runIndex][0];
 }

@@ -1,29 +1,29 @@
 #include "widget.h"
 #include "ui_widget.h"
-#include<QApplication>
-#include<QVector>
-#include<QStringList>
-#include<QLayout>
-#include<QDialog>
-#include<QLabel>
-#include<QLineEdit>
-#include<QPushButton>
-#include<QTextEdit>
-#include<QVBoxLayout>
 #include <QApplication>
-#include<QFileSystemModel>
-#include<QTreeView>
-#include<QListView>
-#include<QDebug>
-#include<QStandardItemModel>
-#include<QHeaderView>
-#include<QTableView>
-#include<line.h>
-#include<getApp.h>
-#include<getCapp.h>
-#include<QPalette>
-#include<QScroller>
-#include<QGesture>
+#include <QVector>
+#include <QStringList>
+#include <QLayout>
+#include <QDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QVBoxLayout>
+#include <QApplication>
+#include <QFileSystemModel>
+#include <QTreeView>
+#include <QListView>
+#include <QDebug>
+#include <QStandardItemModel>
+#include <QHeaderView>
+#include <QTableView>
+#include <line.h>
+#include <getApp.h>
+#include <getCapp.h>
+#include <QPalette>
+#include <QScroller>
+#include <QGesture>
 #include "itemdelegate.h"
 #include "itemdef.h"
 #include "TestListView.h"
@@ -36,12 +36,11 @@ Widget::Widget(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
+    //提供列表接口
     UkuiMenuInterface *pUkuiMenuIneterface = new UkuiMenuInterface;
     applist = pUkuiMenuIneterface -> createAppInfoVector();
 
-
-
-    this->setWindowFlags(Qt::FramelessWindowHint);//无边款
+    this->setWindowFlags(Qt::FramelessWindowHint);//无边框
 
     ui->setupUi(this);
     //设置鼠标光标
@@ -49,43 +48,31 @@ Widget::Widget(QWidget *parent)
     setCursor(cursor);
 
 
+    //显示时间
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), SLOT(time_update()));
     timer->start(100); //0.1s执行一次,定时器
 
-
+    //初始化数据
     initData();
 
-
-   // m_delegate = new ItemDelegate(this);
-   // ui->listView->setItemDelegate(m_delegate);       //为视图设置委托
-    //page->setMovement(QListView::Snap);
-
+    //设置list属性
     page->setMinimumSize(1200,996);
-   // page->setMaximumSize(1200,996);
-
-    //page->setSpacing(72);                   //为视图设置控件间距
-    //ui->listView->setModel(m_model);                  //为委托设置模型
-   // ui->listView->setViewMode(QListView::IconMode); //设置Item图标显示
-
-    page->setDragEnabled(true);            //控件不允许拖动
-
     page->viewport()->setAcceptDrops(true);
-    //ui->listView->setDropIndicatorShown(true);
     page->setDragDropMode(QAbstractItemView::DragDrop);
     page->setStyleSheet("QListView {background-color: transparent;font-color:(255,255,255)}");
 
 
+    display();
 
+    //设置背景图片
+    QPalette pal =this->palette();
+    pal.setBrush(QPalette::Background,QBrush(QPixmap("../layout/pics/background.jpeg")));
+    setPalette(pal);
 
-       display();
-
-      QPalette pal =this->palette();
-      pal.setBrush(QPalette::Background,QBrush(QPixmap("../layout/pics/background.jpeg")));
-      setPalette(pal);
-
-      ui->wid2->installEventFilter(this);
-      ui->wid1->installEventFilter(this);
+    //安装事件过滤器
+    ui->wid2->installEventFilter(this);
+    ui->wid1->installEventFilter(this);
 
 
 }
@@ -95,31 +82,22 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::initData()//显示app图标
+//显示app图标
+void Widget::initData()
 {
-    /*
-    m_model = new QStandardItemModel();
-    for (int i = 0; i < 24; i++) {
-        QStandardItem *Item = new QStandardItem;
-        ItemData itemData;
-        itemData.name = QString("Name");
-        itemData.icon = QPixmap("../layout/pics/icon.jpeg");
-        Item->setData(QVariant::fromValue(itemData),Qt::UserRole+1);//整体存取
-        m_model->appendRow(Item);      //追加Item
-    }*/
+
     QStandardItemModel *  slm ;
 
-    TestItemDelegate *delegate = new TestItemDelegate();
+   // TestItemDelegate *delegate = new TestItemDelegate();
+   // page->setItemDelegate(delegate);
 
-    //page->setItemDelegate(delegate);
-
+    //设置item属性
     page -> setViewMode ( QListView :: IconMode );
     page -> setFocusPolicy(Qt::NoFocus);
     page -> setIconSize ( QSize ( 112 , 112 ));
     page -> setGridSize ( QSize ( 216, 238));
 
-   //ui->listView -> setResizeMode ( QListView :: Adjust );
-
+    //实现滑动
     page->setFlow(QListView::TopToBottom);
     page->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     page->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -131,17 +109,18 @@ void Widget::initData()//显示app图标
                        QListView { outline: none; background-color: transparent; }
                        )");
 
+    //设置模型
     slm=new QStandardItemModel(this);
-    page->setSpacing(82);
+
+    //获取图标等信息
     for (int i = 0; i < applist.size(); i++) {
+
         QStandardItem *s1;
-
         UkuiMenuInterface *pUkuiMenuInterface = new UkuiMenuInterface;
-
         QString name = pUkuiMenuInterface -> getAppName(applist[i][0]);
-
         QString iconstr = pUkuiMenuInterface->getAppIcon(applist[i][0]);
-        QIcon icon;
+
+        QIcon icon;      
         QFileInfo iconFileInfo(iconstr);
         if(iconFileInfo.isFile() && (iconstr.endsWith(".png") || iconstr.endsWith(".svg")))
             icon=QIcon(iconstr);
@@ -169,17 +148,11 @@ void Widget::initData()//显示app图标
             }
         }
 
-
-
-
+        //传入数据
         s1=new QStandardItem(icon,name);
-
-        //qDebug() << icon;
         slm->appendRow(s1);
 
     }
-
-
 
     page->setModel(slm);
 
@@ -197,6 +170,7 @@ void Widget::time_update() //显示系统时间的功能
     ui->l_week->setText(str2);
 }
 
+
 void Widget::pic_display(QLabel*l_pic)
 {
     QPixmap pix("../layout/pics/disp.jpeg");
@@ -207,9 +181,8 @@ void Widget::pic_display(QLabel*l_pic)
 
 void Widget::display()
 {
-   // QLabel *l_day=new QLabel();
-   // QLabel *l_week=new QLabel();
-    //QLabel *l_time=new QLabel();
+
+
     QGridLayout* layout_t = new QGridLayout();//时间组件布局
 
     ui->l_day->setText("03-08");
@@ -219,8 +192,6 @@ void Widget::display()
     ui->l_time->setStyleSheet("QLabel{font: 70 68pt Noto Sans CJK SC Black;color: rgb(255, 255, 255);padding-left:150px;}");
     ui->l_day->setStyleSheet("QLabel{font: 60 30pt  Noto Sans CJK SC Black;color: rgb(255, 255, 255);}");
     ui->l_week->setStyleSheet("QLabel{font: 60 28pt Noto Sans CJK SC Black;color: rgb(255, 255, 255);}");
-
-
 
     ui->l_week->setMinimumSize(112, 60);
     ui->l_day->setMinimumSize(112, 60);
@@ -232,12 +203,10 @@ void Widget::display()
 
     ui->l_day->setAlignment(Qt::AlignTop);
     ui->l_week->setAlignment(Qt::AlignBottom);
-    //l_time->setAlignment(Qt::AlignRight);
     ui->l_time->setAlignment(Qt::AlignCenter);
 
-
-
-    QGridLayout* layout_p = new QGridLayout();// 左侧伸缩栏
+    // 左侧伸缩栏
+    QGridLayout* layout_p = new QGridLayout();
     QLabel *l_pic=new QLabel();
     l_pic->resize(400,800);
     l_pic->setMinimumSize(400,800);
@@ -246,31 +215,16 @@ void Widget::display()
     layout_p->setColumnStretch(0, 3.2);
     layout_p->addLayout(layout_t,0,0);
     layout_p->addWidget(l_pic,1,0);
-    //l_pic->setAlignment(Qt::AlignCenter);
     ui->wid1->setLayout(layout_p);
     ui->wid1->setGeometry(QRect(0,0,610,1080));
 
-
-    QGridLayout* layout_a = new QGridLayout();//右侧app布局
-
-
+    //右侧app布局
+    QGridLayout* layout_a = new QGridLayout();
     QLabel *l_blet=new QLabel();
     QLabel *l_table1=new QLabel();
     QLabel *l_blet1=new QLabel();
 
     page->setMinimumSize(1200,996);
-    //tableView->resize(1300,996);
-    //tableView->horizontalHeader()->setVisible(false);// 水平不可见
-    //tableView->verticalHeader()->setVisible(false);// 垂直不可见
-
-
-    //l_blet->setStyleSheet("QLabel{background-color: rgb(255, 255, 127);}");
-   // l_table1->setStyleSheet("QLabel{background-color: rgb(127, 255, 255);}");
-    //l_blet1->setStyleSheet("QLabel{background-color: rgb(255, 127, 127);padding:0;}");
-   // l_blet->setMaximumWidth(100);
-   // l_blet1->setMaximumWidth(100);
-
-    //appicon_display(tableView);
 
     layout_a->addWidget(page,1,0);
     layout_a->addWidget(l_blet,1,1);
@@ -285,23 +239,23 @@ void Widget::display()
     ui->wid2->setGeometry(QRect(610,0,1300,1080));
 
 
-     //QGridLayout* mainlayout = new QGridLayout();//总体布局
-     //QLabel *l=new QLabel();
-     //l->setStyleSheet("QLabel{background-color: rgb(255, 255, 255);}");
-    // mainlayout->addLayout(layout_p,0,0);
-     //mainlayout->addLayout(layout_a,0,1);
-     //mainlayout->addWidget(l_blet1,1,0,1,2);
+//     QGridLayout* mainlayout = new QGridLayout();//总体布局
+//     QLabel *l=new QLabel();
+//     l->setStyleSheet("QLabel{background-color: rgb(255, 255, 255);}");
+//     mainlayout->addLayout(layout_p,0,0);
+//     mainlayout->addLayout(layout_a,0,1);
+//     mainlayout->addWidget(l_blet1,1,0,1,2);
 
-     //mainlayout->setRowStretch(0, 14.9);//设置行列比例系数
-     //mainlayout->setRowStretch(1, 1);
-   // mainlayout->setColumnStretch(0, 1);
-   //  mainlayout->setColumnStretch(1, 2.41);
-    // mainlayout->setSpacing(0);
+//     mainlayout->setRowStretch(0, 14.9);//设置行列比例系数
+//     mainlayout->setRowStretch(1, 1);
+//     mainlayout->setColumnStretch(0, 1);
+//     mainlayout->setColumnStretch(1, 2.41);
+//     mainlayout->setSpacing(0);
 
 
 
     resize(1920,1080);
-   // setLayout(mainlayout);
+ // setLayout(mainlayout);
 
 }
 
@@ -312,7 +266,6 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
      static int press_y;
      static int relea_x;  //鼠标释放时的位置
      static int relea_y;
-
 
     if(watched==ui->wid1&&flag==1)
     {
@@ -330,6 +283,9 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
         {
             relea_x = eve->globalX();
             relea_y = eve->globalY();
+
+
+            //左侧隐藏
            if((relea_x - press_x)==0 && (relea_y - press_y)==0)
             {
                 QPropertyAnimation *ani=new QPropertyAnimation(ui->wid1,"geometry");
@@ -342,11 +298,9 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
                 ani1->setDuration(300);
                 ani1->setStartValue(QRect(ui->wid2->geometry()));
                 ani1->setEndValue(QRect(110,0,1820,1080));
-               // QRect(610,0,1300,1080)
 
                 QPropertyAnimation *ani2=new QPropertyAnimation(page,"gridSize");
                 ani2->setDuration(300);
-                // setGridSize ( QSize ( 206, 238));
                 ani2->setStartValue(QSize(206, 238));
                 ani2->setEndValue(QSize ( 306, 238));
 
@@ -361,7 +315,7 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
     }
 
 
-
+    //左侧拉出
      if(watched==ui->wid2&&flag==0)
     {
          QMouseEvent *eve = static_cast<QMouseEvent *>(event);
@@ -394,7 +348,6 @@ bool Widget::eventFilter(QObject *watched, QEvent *event)
 
                  QPropertyAnimation *ani2=new QPropertyAnimation(page,"gridSize");
                  ani2->setDuration(300);
-                 // setGridSize ( QSize ( 206, 238));
                  ani2->setStartValue(QSize(306, 238));
                  ani2->setEndValue(QSize ( 206, 238));
 

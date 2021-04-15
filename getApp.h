@@ -1,7 +1,6 @@
 #ifndef GETAPP_H
 #define GETAPP_H
 
-#endif // GETAPP_H
 #include <QtCore>
 #include <sys/types.h>
 #include <unistd.h>
@@ -64,3 +63,5 @@ public:
     QString getUserName();
 
 };
+
+#endif // GETAPP_H
